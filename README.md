@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # CBETA Markdown格式的中文简体大藏经全库
 >传魁居士整理 2026/11/15
 
@@ -424,7 +423,3 @@ python3 tools/extract_txt.py       # 抽取纯文本正文到 txt/（<档号>_tx
 
 ---
 
-=======
-# sutra_txt_zh
-简体中文大藏经, 包含cbeta全部内容
->>>>>>> 8ae6609c8f6acfd05331f39bd764ada653757e53
