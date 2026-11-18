@@ -5,7 +5,7 @@
 > 4,847 档 · 27,043 卷 · 289,171,692 字 · 26 藏
 
 由 `cbeta-text/`（CBETA 原始繁体正文，26 个藏经代码目录、4,899 档、22,150 个分卷文本）
-经 **`tools/txt_to_md.py`** 转换、变体档合并、繁简转换与分类调整而成，为可直接阅读、
+经 **`sutra_lib_tool` 之 `md build`** 转换、变体档合并、繁简转换与分类调整而成，为可直接阅读、
 检索、背诵之版本。
 
 > **本目录以 `index.json`、`README.md`、`CHANGELOG.md` 三者为准。**
@@ -220,7 +220,7 @@ sutra_md/
 
 ## 六、分类规则
 
-依仓库自有规则表 `tools/rules_block.py`（分层：特殊类目 → 疏类 → 主旨 → 诸宗 → 兜底）
+依 `sutra_lib_tool` 之共用规则表 `sutra.rules`（分层：特殊类目 → 疏类 → 主旨 → 诸宗 → 兜底）
 判别部别，**逐档归属依据写入 `index.json` 之 `basis` 栏**，可复核。常用依据示例：
 
 | 依据 | 归属 |
@@ -305,16 +305,21 @@ sutra_md/
 
 ## 十、工具
 
-| 脚本 | 用途 |
+本库之产出工具皆在 **`sutra_lib_tool`**（工具项目），统一入口为 `main.py`，
+阅读版相关者属其 `md` 子命令组：
+
+| 命令 | 用途 |
 |---|---|
-| `tools/txt_to_md.py` | 由 `cbeta-text/<藏经>/<档号>/<档号>_*.txt` 生成 `<档号>.md`（卷品切块、偈颂标记、繁简转换、目录生成）；`--outdir` 指定产出目录、`--no-t2s` 保留繁体、`--audit` 全库结构普查 |
-| `tools/t2s.py` | 繁体→简体转换（`--stat` 字表统计、`--file` 转文件、`--ambiguous` 列歧义字） |
-| `tools/merge_variants.py` | 变体档按上下顺序合并（`--consolidate` 并合源文、更新索引、删原件） |
-| `tools/reclassify_modern.py` | 近现代著作归类调整（迁入 `27_近代撰述`、刷新索引） |
-| `tools/audit_classification.py` | 目录分类审查（对照 `cbeta-text` 与 CBETA 著录；报告输出至 stdout 或 `--out` 指定路径，**不在本目录另存旁支文档**） |
-| `tools/classify_variants.py` | 变体档关系判别（同经上下卷／上下篇／同题异译／关联档／同号异经） |
-| `tools/fix_asset_links.py` | 修正正文中之图片／字体引用链接，改指 `assets/` 相对路径；找不到资源则不改 |
-| `tools/scan_anomalies.py` | 异常字符扫描（`python3 tools/scan_anomalies.py sutra_md <输出路径> .md`；§六 之数据即由此产出） |
+| `md build` | 由 `cbeta-text/<藏经>/<档号>/<档号>_*.txt` 生成 `<档号>.md`（卷品切块、偈颂标记、繁简转换、目录生成）；`--outdir` 指定产出目录、`--no-t2s` 保留繁体、`--audit` 全库结构普查 |
+| `md t2s` | 繁体→简体转换（`--stat` 字表统计、`--file` 转文件、`--ambiguous` 列歧义字） |
+| `md merge` | 变体档按上下顺序合并（`--consolidate` 并合源文、更新索引、删原件） |
+| `md classify` | 近现代著作归类调整（迁入 `27_近代撰述`、刷新索引） |
+| `md audit` | 目录分类审查（对照 `cbeta-text` 与 CBETA 著录；报告输出至 stdout 或 `--out` 指定路径，**不在本目录另存旁支文档**） |
+| `md variants` | 变体档关系判别（同经上下卷／上下篇／同题异译／关联档／同号异经） |
+| `md assets` | 修正正文中之图片／字体引用链接，改指 `assets/` 相对路径；找不到资源则不改 |
+| `md scan` | 异常字符扫描（`python3 main.py md scan --dir sutra_md --out <输出路径> --ext .md`；§六 之数据即由此产出） |
+| `md archify` | 藏经来源脉络绘制（`藏经来源脉络.md`／`.svg`／`.png` 与 `藏经脉络.dot`） |
+| `md subjects` | 专题（`../subjects/`）之生成、索引、链接校验与检索（子命令 `build`／`index`／`check`／`search`） |
 
 ## 十一、来源与对应
 

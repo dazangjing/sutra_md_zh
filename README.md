@@ -16,7 +16,7 @@
 ## 1. 目录结构
 
 ```
-sutra_json_zh/
+sutra_md_zh/
 ├── catalog.json          # 全域索引（26 个藏经、各藏经档案一览）
 ├── categories.json       # 大藏经目录分类表（二十六部 + 撰述四组）
 ├── classification.json   # 全库 4990 档的分类结果（两轴 + 判定依据 + 置信度）
@@ -36,9 +36,13 @@ sutra_json_zh/
 │   ├── B-大藏经补编/
 │   ├── …
 │   └── ZW-藏外佛教文献/
-├── tools/                # 抽取、分类、索引、迁移工具
 └── README.md             # 本文件
 ```
+
+> **工具不在本库**：抽取、分类、索引、迁移与阅读版生成之工具，皆在
+> **`sutra_lib_tool`**（工具项目），统一入口 `main.py`，分 `lib`（资料库建置）
+> 与 `md`（阅读版生成）两个子命令组。逐脚本之对映见
+> `sutra_lib_tool/sutra/docs/porting.md`。
 
 **目录名已一并转为简体**（繁体版目录名 → 简体版目录名）：
 
@@ -230,7 +234,7 @@ JSON 内**所有字符串值**皆套用转换：书目（`work`）、标题、�
 
 ## 5. 与繁体版 `sutra_json` 的关系
 
-| 项目 | 繁体版 `sutra_json` | 简体版 `sutra_json_zh` |
+| 项目 | 繁体版 `sutra_json` | 简体版 `sutra_md_zh` |
 | --- | --- | --- |
 | 档案数 | 5,017 | 5,017 |
 | 目录数 | 26 | 26 |
@@ -247,7 +251,7 @@ JSON 内**所有字符串值**皆套用转换：书目（`work`）、标题、�
 cd /Users/jk/workspace/codebase/sutra_lib_tool
 python3 main.py simplify \
     --src /Users/jk/workspace/codebase/sutra_json \
-    --dst /Users/jk/workspace/codebase/sutra_json_zh
+    --dst /Users/jk/workspace/codebase/sutra_md_zh
 ```
 
 核验（皆已通过）：
@@ -387,14 +391,14 @@ No. 1637                             ← 标号 NO.
 转换器（注文不收、校勘取 `lemma` 正读、`choice` 取 `corr`/`sic`、排版空白不计），
 故正文文字与原 `text` 栏位逐字一致，仅换行位置不同。平均每档行数由 4132 降为 906。
 
-由 `tools/reflow_txt.py` 生成；`tools/extract_txt.py` 为未折行的原始抽取。
+由 `sutra_lib_tool` 之 `lib reflow` 生成；`lib extract-txt` 为未折行的原始抽取。
 
 **档案存放位置**：经文档案已全部迁出源藏经目录，各藏经索引统一收纳于 `sutra_cbeta/`
 （如 `sutra_cbeta/T-大正新修大藏经/index.json`），仅存 `index.json`；正文存于分类
 目录的 `files/` 下。`catalog.json`、各藏经 `index.json` 与各分类 `index.json` 的
 `file` 栏位均已同步更新为新路径。
 
-判定流程（工具：`tools/classify.py` + `tools/rules_block.py`）：
+判定流程（工具：`sutra_lib_tool` 之 `lib classify` + 共用规则表 `sutra.rules`）：
 
 1. **标题规则表**，分层判定——特殊类目（目录／史传／事汇／外教／古逸／疑似）
    → 疏类（律疏／论疏／经疏）→ 主旨（经部、论部、密教、律藏）→ 诸宗部；
@@ -405,21 +409,76 @@ No. 1637                             ← 标号 NO.
    近现代人归现代撰述，其余汉地撰、著、编者归中国撰述；
 4. **现代撰述不入二十六部**（该部只收历代经律论），仅列于「现代撰述」组。
 
-全流程可由下列工具重建：
+全流程可由 `sutra_lib_tool` 之 `lib` 子命令组重建：
 
 ```bash
-python3 tools/extract_meta.py     # 抽取全库题名/著者/卷次
-python3 tools/classify.py         # 依规则表分类
-python3 tools/build_index.py      # 产出各分类索引、总览与覆盖报告
-python3 tools/migrate.py          # 把正文自源藏经目录迁入分类目录（硬链接）
-python3 tools/restore_archives.py  # 档案受损时，自繁体底本重转并重新铺放
-python3 tools/move_cbeta.py       # 将各藏经索引目录归并到 sutra_cbeta/
-python3 tools/build_global_index.py # 生成全局索引与目录清单
-python3 tools/extract_txt.py       # 抽取纯文本正文到 txt/（<档号>_txt.json）
+python3 main.py lib meta         # 抽取全库题名/著者/卷次
+python3 main.py lib classify     # 依规则表分类
+python3 main.py lib index        # 产出各分类索引、总览与覆盖报告
+python3 main.py lib migrate      # 把正文自源藏经目录迁入分类目录（硬链接）
+python3 main.py lib restore      # 档案受损时，自繁体底本重转并重新铺放
+python3 main.py lib cbeta        # 将各藏经索引目录归并到 sutra_cbeta/
+python3 main.py lib global       # 生成全局索引与目录清单
+python3 main.py lib extract-txt  # 抽取纯文本正文到 txt/（<档号>_txt.json）
 ```
 
 分类为规则自动判定，`confidence` 标为 `low` 者为卷次推定或弱特征命中，建议抽样复核
 （清单见《分类覆盖报告.md》第 3–4 节）。
+
+---
+
+## 10. 专题目录（subjects/）
+
+`subjects/` 收录按**宗派／菩萨专题**编纂的佛典目录，每篇按该宗派**修行实践的
+主要特点**分类编排（如净土宗分「根本经典／专修法门／礼忏仪轨／临终接引／
+义理疏论／释疑辨难／念佛语录／往生凭证」），并对已入藏者给出指向 `sutra_md/`
+正文的链接。
+
+| 专题 | 文件 |
+| --- | --- |
+| 净土宗 | [subjects/净土宗.md](subjects/净土宗.md) |
+| 华严宗 | [subjects/华严宗.md](subjects/华严宗.md) |
+| 禅宗 | [subjects/禅宗.md](subjects/禅宗.md) |
+| 法华专辑 | [subjects/法华专辑.md](subjects/法华专辑.md) |
+| 天台宗 | [subjects/天台宗.md](subjects/天台宗.md) |
+| 地藏菩萨专辑 | [subjects/地藏菩萨专辑.md](subjects/地藏菩萨专辑.md) |
+| 观音菩萨专辑 | [subjects/观音菩萨专辑.md](subjects/观音菩萨专辑.md) |
+| 弥勒菩萨专辑 | [subjects/弥勒菩萨专辑.md](subjects/弥勒菩萨专辑.md) |
+| 律宗 | [subjects/律宗.md](subjects/律宗.md) |
+| 唯识宗（瑜伽宗） | [subjects/唯识宗.md](subjects/唯识宗.md) |
+| 中观宗（三论宗） | [subjects/中观宗.md](subjects/中观宗.md) |
+| 密教宗 | [subjects/密教宗.md](subjects/密教宗.md) |
+| 图文并茂 | [subjects/图文并茂.md](subjects/图文并茂.md) |
+
+其中「弥勒菩萨专辑」收以弥勒为主之典籍三十部（本愿所问、兜率上生、龙华下生、
+成佛来时、密教咒与瑜伽、兜率往生与龙华修证六节）；「图文并茂」则不依宗派，
+而汇本库中**含有图像**之全部典籍五百一十三部（图四千五百七十二幅），
+分为图像特多、密教瑜伽仪轨、寺志山川、图赞像绘、史传感应、经疏图表六类。
+
+编写规范见 [subjects/README.md](subjects/README.md)，分篇目录见
+[subjects/索引.md](subjects/索引.md)。相关工具（在 `sutra_lib_tool`）：
+
+```bash
+python3 main.py md subjects search 念佛    # 按标题关键词检索库内典籍
+python3 main.py md subjects check          # 校验专题内全部链接可达
+python3 main.py md subjects index          # 重建专题索引
+python3 main.py md appendix --dry-run      # 演算禅宗附录之链接化
+```
+
+### 10.1 禅宗附录之来源
+
+禅宗专题之附录为《禅宗全书》目录（本库未收此书正文，故附录内容无法自库中
+导出），其来源档为阅读版根下之 [禅宗全书目录.md](禅宗全书目录.md)。
+
+该档为纯文本（内含「■ 《禅宗全书》目录」标记）。`main.py md subjects build`
+自此档取附录，生成 `subjects/禅宗.md`，并将附录之 600 条条目与本库典籍
+对映成链接（未收本库者保留为纯文本）。附录文字与来源档逐字相同，惟增链接
+而已。
+
+```bash
+python3 main.py md subjects build              # 自来源档重建禅宗专题
+python3 main.py md subjects build --appendix <路径>   # 或另指定来源档
+```
 
 ---
 
